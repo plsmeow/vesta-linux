@@ -1,4 +1,8 @@
 #pragma once
+#ifdef __linux__
+#include <platform/lnx/storage.hpp>
+#include <platform/lnx/compat.hpp>
+#else
 
 #include <platform/windows/data_paths.hpp>
 
@@ -24,3 +28,4 @@ namespace platform::windows
 [[nodiscard]] std::error_code write_file_atomically(const std::filesystem::path& target,
                                                     std::string_view contents) noexcept;
 } // namespace platform::windows
+#endif

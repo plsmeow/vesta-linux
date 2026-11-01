@@ -1,10 +1,19 @@
 #include <diagnostics/journal.hpp>
 #include <diagnostics/build_identity.hpp>
 #include <diagnostics/log_directory.hpp>
+#if defined(_WIN32)
 #include <foundation/unique_handle.hpp>
-#include <foundation/scope_exit.hpp>
 #include <shlobj.h>
 #include <bcrypt.h>
+#else
+#include <cerrno>
+#include <fcntl.h>
+#include <sys/file.h>
+#include <sys/random.h>
+#include <sys/eventfd.h>
+#include <poll.h>
+#include <unistd.h>
+#endif
 #include <algorithm>
 #include <cstdio>
 #include <utility>

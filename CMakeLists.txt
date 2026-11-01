@@ -250,6 +250,7 @@ if(NOT VESTA_BUILD_REVISION MATCHES "^[A-Za-z0-9._-]+$" OR vesta_revision_length
     message(FATAL_ERROR "Diagnostic build revision must be a bounded identifier")
 endif()
 configure_file(src/diagnostics/build_identity.hpp.in generated/diagnostics/build_identity.hpp @ONLY)
+if(WIN32)
 add_library(vesta_diagnostics STATIC src/diagnostics/journal.cpp src/diagnostics/crash_record.cpp src/diagnostics/report.cpp src/diagnostics/log_directory.cpp)
 target_include_directories(vesta_diagnostics PUBLIC src PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_link_libraries(vesta_diagnostics PUBLIC shell32 ole32 bcrypt)
@@ -428,3 +429,65 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nlohmann_json)
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(Threads REQUIRED)
+
+    set(VESTA_CS2_DUMP_DIR "" CACHE PATH "Directory containing cs2-dumper output files")
+    if(VESTA_CS2_DUMP_DIR AND EXISTS "${VESTA_CS2_DUMP_DIR}/offsets.hpp")
+        file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/generated/cs2")
+        configure_file("${VESTA_CS2_DUMP_DIR}/offsets.hpp" "${CMAKE_CURRENT_BINARY_DIR}/generated/cs2/offsets.hpp" COPYONLY)
+        set(VESTA_CS2_DUMP_AVAILABLE ON)
+    else()
+        set(VESTA_CS2_DUMP_AVAILABLE OFF)
+    endif()
+
+    add_library(vesta_platform_linux STATIC
+        src/platform/lnx/process.cpp
+        src/platform/lnx/input.cpp
+        src/platform/lnx/data_paths.cpp
+        src/platform/lnx/open_folder.cpp
+        src/platform/lnx/user_settings.cpp
+        src/platform/lnx/storage.cpp
+        src/platform/lnx/activation.cpp
+    )
+    target_include_directories(vesta_platform_linux PUBLIC src "${CMAKE_CURRENT_BINARY_DIR}/generated")
+    target_compile_features(vesta_platform_linux PUBLIC cxx_std_23)
+    target_link_libraries(vesta_platform_linux PUBLIC Threads::Threads)
+    target_compile_options(vesta_platform_linux PRIVATE -Wall -Wextra -Wpedantic)
+    target_sources(vesta_platform_linux PRIVATE src/game/memory/modules.cpp src/game/memory/addresses.cpp)
+    if(VESTA_CS2_DUMP_AVAILABLE)
+        target_compile_definitions(vesta_platform_linux PRIVATE VESTA_CS2_DUMP_AVAILABLE=1)
+    endif()
+    add_library(vesta_diagnostics_linux STATIC
+        src/diagnostics/log_linux.cpp
+        src/diagnostics/log_directory_linux.cpp
+        src/diagnostics/crash_record_linux.cpp
+        src/diagnostics/report_linux.cpp
+        src/diagnostics/journal_linux.cpp
+    )
+    target_include_directories(vesta_diagnostics_linux PUBLIC src PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
+    target_compile_features(vesta_diagnostics_linux PUBLIC cxx_std_23)
+    target_compile_definitions(vesta_diagnostics_linux PRIVATE VESTA_JOURNAL_CONFIGURATION="$<CONFIG>")
+    target_compile_options(vesta_diagnostics_linux PRIVATE -Wall -Wextra -Wpedantic)
+    find_package(OpenGL REQUIRED)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GLFW3 REQUIRED IMPORTED_TARGET glfw3)
+    pkg_check_modules(FREETYPE2 REQUIRED IMPORTED_TARGET freetype2)
+    add_library(vesta_imgui_linux STATIC
+        src/ui/overlay/linux_imgui_surface.cpp
+        ${VESTA_IMGUI_DIR}/imgui.cpp
+        ${VESTA_IMGUI_DIR}/imgui_draw.cpp
+        ${VESTA_IMGUI_DIR}/imgui_tables.cpp
+        ${VESTA_IMGUI_DIR}/imgui_widgets.cpp
+        ${VESTA_IMGUI_DIR}/misc/freetype/imgui_freetype.cpp
+        ${VESTA_IMGUI_DIR}/backends/imgui_impl_glfw.cpp
+        ${VESTA_IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+    )
+    target_include_directories(vesta_imgui_linux PUBLIC src ${VESTA_IMGUI_DIR} ${VESTA_IMGUI_DIR}/backends)
+    target_compile_features(vesta_imgui_linux PUBLIC cxx_std_23)
+    target_link_libraries(vesta_imgui_linux PUBLIC PkgConfig::GLFW3 PkgConfig::FREETYPE2 OpenGL::GL)
+    target_compile_definitions(vesta_imgui_linux PUBLIC IMGUI_ENABLE_FREETYPE IMGUI_USE_WCHAR32 IMGUI_DEFINE_MATH_OPERATORS)
+
+endif()

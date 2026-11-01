@@ -1,4 +1,8 @@
 #pragma once
+#ifdef __linux__
+#include <platform/lnx/worker_control.hpp>
+#include <platform/lnx/compat.hpp>
+#else
 
 #include <foundation/unique_handle.hpp>
 
@@ -125,3 +129,4 @@ private:
 };
 
 } // namespace platform::windows
+#endif

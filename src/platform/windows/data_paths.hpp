@@ -1,4 +1,8 @@
 #pragma once
+#ifdef __linux__
+#include <platform/lnx/data_paths.hpp>
+#include <platform/lnx/compat.hpp>
+#else
 #include <filesystem>
 #include <cstdint>
 #include <stop_token>
@@ -61,3 +65,4 @@ struct migration_result
 [[nodiscard]] migration_result migrate(const locations& destination, const std::filesystem::path& legacy,
                                        std::stop_token stop = {}) noexcept;
 } // namespace platform::windows::data_storage
+#endif

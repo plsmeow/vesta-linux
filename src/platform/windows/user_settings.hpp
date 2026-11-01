@@ -1,4 +1,8 @@
 #pragma once
+#ifdef __linux__
+#include <platform/lnx/user_settings.hpp>
+#include <platform/lnx/compat.hpp>
+#else
 
 #include <filesystem>
 #include <optional>
@@ -15,3 +19,4 @@ namespace platform::windows
 // permanently.
 [[nodiscard]] std::error_code move_to_recycle_bin(const std::filesystem::path& path) noexcept;
 } // namespace platform::windows
+#endif

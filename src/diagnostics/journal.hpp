@@ -6,7 +6,11 @@
 #include <cstdint>
 #include <filesystem>
 #include <thread>
+#if defined(_WIN32)
 #include <windows.h>
+#else
+#include <sys/types.h>
+#endif
 
 namespace diagnostics
 {
@@ -15,7 +19,11 @@ struct journal_options
     // Empty selects %TEMP%\vesta\logs on the writer.
     std::filesystem::path directory;
     std::size_t file_bytes{64 * 1024};
+#if defined(_WIN32)
     std::wstring writer_gate{L"Local\\VestaDiagnosticJournal-v1"};
+#else
+    std::string writer_gate{"vesta-diagnostic-journal-v1"};
+#endif
 };
 enum class storage_stage : std::uint32_t
 {
@@ -71,7 +79,11 @@ private:
     std::atomic<bool> m_accepting{};
     std::size_t m_head{}, m_count{};
     std::uint64_t m_sequence{}, m_origin_ms{};
+#if defined(_WIN32)
     HANDLE m_wake{};
+#else
+    int m_wake{-1};
+#endif
     std::thread m_thread;
     std::atomic<std::uint64_t> m_submitted{}, m_accepted{}, m_dropped{}, m_pending_dropped{}, m_suppressed{},
         m_storage_lost{}, m_storage_retries{};

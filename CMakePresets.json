@@ -7,6 +7,34 @@
   },
   "configurePresets": [
     {
+      "name": "linux-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/linux/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "linux-debug",
+      "displayName": "vesta Linux Debug",
+      "inherits": "linux-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "VESTA_OUTPUT_NAME": "vesta"
+      }
+    },
+    {
+      "name": "linux-release",
+      "displayName": "vesta Linux Release",
+      "inherits": "linux-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "VESTA_OUTPUT_NAME": "vesta"
+      }
+    },
+    {
       "name": "msvc-base",
       "hidden": true,
       "generator": "Visual Studio 17 2022",
@@ -45,6 +73,16 @@
   ],
   "buildPresets": [
     {
+      "name": "linux-debug",
+      "displayName": "Build vesta Linux Debug",
+      "configurePreset": "linux-debug"
+    },
+    {
+      "name": "linux-release",
+      "displayName": "Build vesta Linux Release",
+      "configurePreset": "linux-release"
+    },
+    {
       "name": "debug",
       "displayName": "Build vesta Debug",
       "configurePreset": "debug",
@@ -58,6 +96,7 @@
     },
     {
       "name": "profile",
+      "displayName": "Build vesta Profile",
       "configurePreset": "profile",
       "configuration": "Release"
     }

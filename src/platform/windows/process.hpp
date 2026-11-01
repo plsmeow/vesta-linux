@@ -1,4 +1,8 @@
 #pragma once
+#ifdef __linux__
+#include <platform/lnx/process.hpp>
+#include <platform/lnx/compat.hpp>
+#else
 
 #include <cstddef>
 #include <cstdint>
@@ -71,3 +75,4 @@ private:
 };
 
 } // namespace platform::windows
+#endif

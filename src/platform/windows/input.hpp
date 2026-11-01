@@ -1,4 +1,8 @@
 #pragma once
+#ifdef __linux__
+#include <platform/lnx/input.hpp>
+#include <platform/lnx/compat.hpp>
+#else
 
 #include <windows.h>
 
@@ -210,3 +214,4 @@ void bind_input(input_gateway& gateway) noexcept;
 [[nodiscard]] input_gateway& bound_input() noexcept;
 
 } // namespace platform::windows
+#endif

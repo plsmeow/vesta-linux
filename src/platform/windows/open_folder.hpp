@@ -1,4 +1,8 @@
 #pragma once
+#ifdef __linux__
+#include <platform/lnx/open_folder.hpp>
+#include <platform/lnx/compat.hpp>
+#else
 #include <filesystem>
 #include <string>
 
@@ -13,3 +17,4 @@ namespace platform::windows
 // argument must be a directory. The generic shell-open handler stays out of the executable by design.
 [[nodiscard]] bool open_folder(const std::filesystem::path& folder) noexcept;
 } // namespace platform::windows
+#endif

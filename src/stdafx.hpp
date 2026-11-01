@@ -3,11 +3,13 @@
 // Precompiled header: the Windows SDK and the standard library only. Project headers are included by the files
 // that use them, so each file states its real dependencies.
 
+#if defined(_WIN32)
 // windows
 #include <windows.h>
 #include <tlhelp32.h>
 #include <dwmapi.h>
 #include <windowsx.h>
+#endif
 
 // standard
 #include <array>

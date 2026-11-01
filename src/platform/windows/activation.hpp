@@ -1,4 +1,8 @@
 #pragma once
+#ifdef __linux__
+#include <platform/lnx/activation.hpp>
+#include <platform/lnx/compat.hpp>
+#else
 
 #include <windows.h>
 
@@ -57,3 +61,4 @@ private:
     return key_activations().active(mode, key, always_mode, hold_mode, toggle_mode);
 }
 } // namespace platform::windows
+#endif
